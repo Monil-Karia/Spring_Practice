@@ -1,11 +1,12 @@
 package com.yours_bank.restapi.service;
 
-import com.yours_bank.restapi.entity.Account;
 import com.yours_bank.restapi.entity.Customer;
 import com.yours_bank.restapi.entity.Transaction;
+import com.yours_bank.restapi.entity.Account;
 import com.yours_bank.restapi.repository.AccountRepository;
 import com.yours_bank.restapi.repository.CustomerRepository;
 import com.yours_bank.restapi.repository.TransactionRepository;
+import com.yours_bank.restapi.validator.CustomerValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,11 @@ public class BankService {
     @Autowired
     private TransactionRepository transactionRepo;
 
+    @Autowired
+    private CustomerValidator customerValidator;
+
     public Customer registerCustomer(Customer customer) {
+        customerValidator.validateCustomer(customer);
         customer.setCustomerId(generateCustomerId());
         Account account = new Account();
         account.setAccountNumber(generateAccountNumber());
@@ -37,6 +42,7 @@ public class BankService {
     }
 
     public Optional<Customer> updateCustomer(int id, Customer updatedCustomer) {
+        customerValidator.validateCustomer(updatedCustomer);
         Optional<Customer> existingCustomer = customerRepo.findById(id);
         if (existingCustomer.isPresent()) {
             Customer customer = existingCustomer.get();
@@ -49,6 +55,7 @@ public class BankService {
         }
         return Optional.empty();
     }
+
 
     public Optional<Transaction> creditAccount(int accountId, double amount) {
         Optional<Account> accountOpt = accountRepo.findById(accountId);
